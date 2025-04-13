@@ -81,9 +81,8 @@ Rewrite it in a single bullet point with the following standards:
 1. Start with a strong action verb (e.g., "Developed", "Optimized", "Implemented").
 2. Include measurable outcomes or metrics (e.g., "reduced load time by 40%", "improved coverage to 95%").
 3. Mention relevant technologies, languages, frameworks, tools.
-4. Keep it between 20-30 words, focus on impact over tasks.
-5. Follow industry standards used in FAANG or top-tier company resumes.
-6. Use keywords likely to pass ATS scans (e.g., REST API, React, AWS, CI/CD, algorithms, scalable, etc).
+4. Follow industry standards used in FAANG or top-tier company resumes.
+5. Use keywords likely to pass ATS scans (e.g., REST API, React, AWS, CI/CD, algorithms, scalable, etc).
 
 Example:
 ❌ "Worked on a project using Node.js"
@@ -92,7 +91,7 @@ Example:
 Now, improve this description:
 "${current}"
 
-Output only the improved bullet point, no extra text.
+Output only the improved bullet point, no extra text, One page, Point wise.
 `;
 
 
