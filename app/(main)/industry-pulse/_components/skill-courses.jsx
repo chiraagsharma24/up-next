@@ -2,107 +2,45 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Star, Clock, ExternalLink, Loader2 } from "lucide-react";
 import { fetchSkillCourses } from "@/lib/gemini";
-import { ExternalLink, Star } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Fallback data in case API fails
-const fallbackData = {
-  skill: "JavaScript",
-  english: [
-    {
-      title: "JavaScript Fundamentals",
-      provider: "Udemy",
-      url: "https://www.udemy.com/course/javascript-fundamentals",
-      level: "Beginner",
-      rating: 4.5,
-      duration: "12 hours"
-    },
-    {
-      title: "Advanced JavaScript Concepts",
-      provider: "Coursera",
-      url: "https://www.coursera.org/course/advanced-javascript",
-      level: "Advanced",
-      rating: 4.7,
-      duration: "18 hours"
-    },
-    {
-      title: "JavaScript for Web Development",
-      provider: "freeCodeCamp",
-      url: "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
-      level: "Intermediate",
-      rating: 4.6,
-      duration: "15 hours"
-    }
-  ],
-  hindi: [
-    {
-      title: "जावास्क्रिप्ट बेसिक्स",
-      provider: "YouTube",
-      url: "https://www.youtube.com/watch?v=javascript-basics",
-      level: "Beginner",
-      rating: 4.4,
-      duration: "10 hours"
-    },
-    {
-      title: "जावास्क्रिप्ट एडवांस्ड",
-      provider: "Udemy",
-      url: "https://www.udemy.com/course/javascript-advanced-hindi",
-      level: "Advanced",
-      rating: 4.5,
-      duration: "16 hours"
-    },
-    {
-      title: "वेब डेवलपमेंट के लिए जावास्क्रिप्ट",
-      provider: "Coursera",
-      url: "https://www.coursera.org/course/javascript-web-hindi",
-      level: "Intermediate",
-      rating: 4.3,
-      duration: "14 hours"
-    }
-  ]
-};
-
-// Popular skills to choose from
-const popularSkills = [
-  "JavaScript",
-  "Python",
-  "Java",
-  "React",
-  "Node.js",
+const skills = [
+  "Programming",
+  "Web Development",
   "Data Science",
   "Machine Learning",
-  "AWS",
+  "Cloud Computing",
   "DevOps",
+  "Mobile Development",
   "UI/UX Design"
 ];
 
 export default function SkillCourses() {
-  const [selectedSkill, setSelectedSkill] = useState(popularSkills[0]);
+  const [selectedSkill, setSelectedSkill] = useState(skills[0]);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("english");
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const coursesData = await fetchSkillCourses(selectedSkill);
-        if (coursesData && coursesData.english && coursesData.hindi) {
-          setData(coursesData);
+        const courseData = await fetchSkillCourses(selectedSkill);
+        if (courseData && courseData.english && courseData.hindi) {
+          setData(courseData);
         } else {
-          console.warn("Using fallback data due to empty or invalid API response");
-          setData(fallbackData);
+          throw new Error("Invalid course data received");
         }
       } catch (err) {
-        console.error("Error fetching skill courses:", err);
-        setError("Failed to load course recommendations. Please try again later.");
-        setData(fallbackData);
+        console.error("Error fetching course data:", err);
+        setError("Failed to load courses. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -111,16 +49,53 @@ export default function SkillCourses() {
     loadData();
   }, [selectedSkill]);
 
+  const CourseCard = ({ course, language }) => (
+    <Card className="h-full">
+      <CardContent className="pt-6">
+        <div className="flex flex-col h-full">
+          <div className="flex-1">
+            <h3 className="font-semibold line-clamp-2 mb-2">{course.title}</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">{course.provider}</Badge>
+                <Badge variant="outline">{course.level}</Badge>
+              </div>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4 text-yellow-400" />
+                  <span>{course.rating}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span>{course.duration}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => window.open(course.url, "_blank")}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              {language === 'english' ? 'View Course' : 'कोर्स देखें'}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Learn {selectedSkill}</h2>
+    <div className="space-y-4">
+      <div className="flex justify-end">
         <Select value={selectedSkill} onValueChange={setSelectedSkill}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select skill" />
           </SelectTrigger>
           <SelectContent>
-            {popularSkills.map((skill) => (
+            {skills.map((skill) => (
               <SelectItem key={skill} value={skill}>
                 {skill}
               </SelectItem>
@@ -135,111 +110,57 @@ export default function SkillCourses() {
         </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="english" className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="english">English Courses</TabsTrigger>
-          <TabsTrigger value="hindi">Hindi Courses</TabsTrigger>
+          <TabsTrigger value="hindi">हिंदी कोर्स</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="english" className="mt-4">
+
+        <TabsContent value="english">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Array(3).fill(0).map((_, index) => (
                 <Card key={index}>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
-                  </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-6">
+                    <Skeleton className="h-6 w-3/4 mb-4" />
                     <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-10 w-full mt-4" />
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {data?.english.map((course, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{course.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">{course.provider}</span>
-                        <Badge variant="outline">{course.level}</Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                        <span className="text-sm">{course.rating} / 5.0</span>
-                        <span className="text-sm text-muted-foreground">• {course.duration}</span>
-                      </div>
-                      <a 
-                        href={course.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-sm text-blue-600 hover:underline mt-2"
-                      >
-                        View Course <ExternalLink className="h-3 w-3 ml-1" />
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
+                <CourseCard key={index} course={course} language="english" />
               ))}
             </div>
           )}
         </TabsContent>
-        
-        <TabsContent value="hindi" className="mt-4">
+
+        <TabsContent value="hindi">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Array(3).fill(0).map((_, index) => (
                 <Card key={index}>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
-                  </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-6">
+                    <Skeleton className="h-6 w-3/4 mb-4" />
                     <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-2/3" />
                       <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-10 w-full mt-4" />
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {data?.hindi.map((course, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{course.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">{course.provider}</span>
-                        <Badge variant="outline">{course.level}</Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                        <span className="text-sm">{course.rating} / 5.0</span>
-                        <span className="text-sm text-muted-foreground">• {course.duration}</span>
-                      </div>
-                      <a 
-                        href={course.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-sm text-blue-600 hover:underline mt-2"
-                      >
-                        View Course <ExternalLink className="h-3 w-3 ml-1" />
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
+                <CourseCard key={index} course={course} language="hindi" />
               ))}
             </div>
           )}

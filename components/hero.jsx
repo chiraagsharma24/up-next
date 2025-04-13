@@ -65,6 +65,17 @@ const HeroSection = () => {
           </Link>
         </div>
       </div>
+      <div className="hero-image-wrapper mt-12">
+        <div ref={imageRef} className="hero-image">
+          <Image
+            src="/hero-image.png"
+            alt="Career Growth"
+            width={800}
+            height={400}
+            className="rounded-lg shadow-2xl"
+          />
+        </div>
+      </div>
     </section>
   );
 };

@@ -101,7 +101,7 @@ export default function CompanyGrowth() {
                   Growth: {item.growth}%
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Hiring: {item.hiring.toLocaleString()} positions
+                  Hiring: {typeof item.hiring === 'number' ? item.hiring.toLocaleString() : '0'} positions
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Market Cap: ₹{item.marketCap}B

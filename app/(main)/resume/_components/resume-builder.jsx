@@ -10,6 +10,7 @@ import {
   Loader2,
   Monitor,
   Save,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import MDEditor from "@uiw/react-md-editor";
@@ -27,6 +28,7 @@ import html2pdf from "html2pdf.js/dist/html2pdf.min.js";
 import { generateATSResume } from "@/lib/gemini";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { LatexResumeButton } from "./latex-resume-button";
 
 export default function ResumeBuilder({ initialContent }) {
   const [activeTab, setActiveTab] = useState("edit");
@@ -46,6 +48,7 @@ export default function ResumeBuilder({ initialContent }) {
     watch,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     resolver: zodResolver(resumeSchema),
     defaultValues: {
@@ -155,24 +158,70 @@ export default function ResumeBuilder({ initialContent }) {
     }
   };
 
-  const optimizeResume = async (data) => {
+  const optimizeResume = async () => {
     try {
       setIsOptimizing(true);
+      
+      // Validate required fields
+      if (!jobDescription || jobDescription.trim() === "") {
+        toast.error("Please enter a job description");
+        return;
+      }
+      
+      if (!targetRole || targetRole.trim() === "") {
+        toast.error("Please enter a target role");
+        return;
+      }
+      
+      // Log input data for debugging
+      console.log("Optimizing resume with:", {
+        jobDescription,
+        targetRole,
+        userInput: formValues
+      });
+      
+      // Add a random seed to ensure unique responses
+      const randomSeed = Math.random().toString(36).substring(7);
       const optimizedContent = await generateATSResume({
         jobDescription,
-        userInput: data,
+        userInput: formValues,
         targetRole,
+        randomSeed // This will help ensure unique responses
       });
-
-      // Update form with optimized content
-      reset(optimizedContent);
-      setKeywords(optimizedContent.keywords);
-      setSuggestions(optimizedContent.suggestions);
       
-      toast.success("Resume optimized successfully!");
+      // Log response for debugging
+      console.log("Received optimized content:", optimizedContent);
+      
+      if (!optimizedContent) {
+        throw new Error("No optimized content received");
+      }
+      
+      // Update form with optimized content
+      setValue("summary", optimizedContent.summary || "");
+      setValue("skills", optimizedContent.skills || []);
+      setValue("experience", optimizedContent.experience || []);
+      setValue("education", optimizedContent.education || []);
+      setValue("projects", optimizedContent.projects || []);
+      
+      // Update keywords and suggestions with random sorting to ensure variety
+      setKeywords([...optimizedContent.keywords || []].sort(() => Math.random() - 0.5));
+      setSuggestions([...optimizedContent.suggestions || []].sort(() => Math.random() - 0.5));
+      
+      // Check if we're using fallback data (no API key)
+      if (!process.env.GEMINI_API_KEY) {
+        toast.info(
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            <span>Using AI-generated fallback data (API key not set)</span>
+          </div>,
+          { duration: 5000 }
+        );
+      } else {
+        toast.success("Resume optimized successfully!");
+      }
     } catch (error) {
       console.error("Error optimizing resume:", error);
-      toast.error("Failed to optimize resume. Please try again.");
+      toast.error(error.message || "Failed to optimize resume. Please try again.");
     } finally {
       setIsOptimizing(false);
     }
@@ -215,6 +264,7 @@ export default function ResumeBuilder({ initialContent }) {
               </>
             )}
           </Button>
+          <LatexResumeButton resumeData={formValues} />
         </div>
       </div>
 
@@ -472,7 +522,7 @@ export default function ResumeBuilder({ initialContent }) {
             />
           </div>
           <Button
-            onClick={() => optimizeResume(formValues)}
+            onClick={optimizeResume}
             disabled={!jobDescription || !targetRole || isOptimizing}
           >
             {isOptimizing ? (

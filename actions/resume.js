@@ -4,6 +4,7 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
+import { generateLatexResume } from "@/app/lib/latex-resume";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -94,5 +95,40 @@ export async function improveWithAI({ current, type }) {
   } catch (error) {
     console.error("Error improving content:", error);
     throw new Error("Failed to improve content");
+  }
+}
+
+export async function generateLatexResumeAction() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) throw new Error("User not found");
+
+  try {
+    // Get the user's resume data
+    const resume = await db.resume.findUnique({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (!resume) {
+      throw new Error("Resume not found");
+    }
+
+    // Parse the resume content
+    const resumeData = JSON.parse(resume.content);
+    
+    // Generate LaTeX content
+    const latexContent = generateLatexResume(resumeData);
+    
+    return { success: true, latexContent };
+  } catch (error) {
+    console.error("Error generating LaTeX resume:", error);
+    throw new Error("Failed to generate LaTeX resume");
   }
 }

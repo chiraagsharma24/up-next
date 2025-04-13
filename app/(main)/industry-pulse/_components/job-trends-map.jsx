@@ -38,7 +38,14 @@ export default function JobTrendsMap() {
       try {
         const jobData = await fetchJobMarketData(timeframe);
         if (jobData && Array.isArray(jobData) && jobData.length > 0) {
-          setData(jobData);
+          // Ensure all required properties exist
+          const validatedData = jobData.map(item => ({
+            location: item.location || item.city || "Unknown",
+            jobs: typeof item.jobs === 'number' ? item.jobs : (item.jobCount || 0),
+            salary: typeof item.salary === 'number' ? item.salary : 0,
+            growth: typeof item.growth === 'number' ? item.growth : 0
+          }));
+          setData(validatedData);
         } else {
           console.warn("Using fallback data due to empty or invalid API response");
           setData(fallbackData);
@@ -129,13 +136,13 @@ export default function JobTrendsMap() {
                 <h3 className="font-semibold">{item.location}</h3>
                 <div className="mt-2 space-y-1">
                   <p className="text-sm text-muted-foreground">
-                    Jobs: {item.jobs.toLocaleString()}
+                    Jobs: {typeof item.jobs === 'number' ? item.jobs.toLocaleString() : '0'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Avg Salary: ₹{item.salary.toLocaleString()}
+                    Avg Salary: ₹{typeof item.salary === 'number' ? item.salary.toLocaleString() : '0'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Growth: {item.growth}%
+                    Growth: {typeof item.growth === 'number' ? item.growth : '0'}%
                   </p>
                 </div>
               </CardContent>

@@ -106,7 +106,7 @@ export default function SkillDemand() {
                   Growth Rate: {item.growth}%
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Avg Salary: ₹{item.salary.toLocaleString()}
+                  Avg Salary: ₹{typeof item.salary === 'number' ? item.salary.toLocaleString() : '0'}
                 </p>
               </div>
             </CardContent>

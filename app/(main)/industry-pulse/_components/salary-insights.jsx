@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fetchSalaryInsights } from "@/lib/gemini";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 // Fallback data in case API fails
 const fallbackData = [
@@ -120,9 +121,12 @@ export default function SalaryInsights() {
             <Card>
               <CardContent className="pt-6">
                 <h3 className="font-semibold">Starting Salary</h3>
-                <p className="text-2xl font-bold mt-2">
-                  ₹{data[0]?.salary.toLocaleString()}
-                </p>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  <span>
+                    ₹{data[0]?.salary && typeof data[0].salary === 'number' ? data[0].salary.toLocaleString() : '0'}
+                  </span>
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {data[0]?.year}
                 </p>
@@ -131,9 +135,12 @@ export default function SalaryInsights() {
             <Card>
               <CardContent className="pt-6">
                 <h3 className="font-semibold">Current Salary</h3>
-                <p className="text-2xl font-bold mt-2">
-                  ₹{data[data.length - 1]?.salary.toLocaleString()}
-                </p>
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                  <span>
+                    ₹{data[data.length - 1]?.salary && typeof data[data.length - 1].salary === 'number' ? data[data.length - 1].salary.toLocaleString() : '0'}
+                  </span>
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {data[data.length - 1]?.year}
                 </p>
