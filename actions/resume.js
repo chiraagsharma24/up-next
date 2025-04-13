@@ -72,20 +72,29 @@ export async function improveWithAI({ current, type }) {
   if (!user) throw new Error("User not found");
 
   const prompt = `
-    As an expert resume writer, improve the following ${type} description for a ${user.industry} professional.
-    Make it more impactful, quantifiable, and aligned with industry standards.
-    Current content: "${current}"
+You are a professional technical resume writer specialized in software engineering roles.
 
-    Requirements:
-    1. Use action verbs
-    2. Include metrics and results where possible
-    3. Highlight relevant technical skills
-    4. Keep it concise but detailed
-    5. Focus on achievements over responsibilities
-    6. Use industry-specific keywords
-    
-    Format the response as a single paragraph without any additional text or explanations.
-  `;
+Your task is to improve the following ${type} description for a Software Development Engineer (SDE) resume.
+
+Rewrite it in a single bullet point with the following standards:
+
+1. Start with a strong action verb (e.g., "Developed", "Optimized", "Implemented").
+2. Include measurable outcomes or metrics (e.g., "reduced load time by 40%", "improved coverage to 95%").
+3. Mention relevant technologies, languages, frameworks, tools.
+4. Keep it between 20-30 words, focus on impact over tasks.
+5. Follow industry standards used in FAANG or top-tier company resumes.
+6. Use keywords likely to pass ATS scans (e.g., REST API, React, AWS, CI/CD, algorithms, scalable, etc).
+
+Example:
+❌ "Worked on a project using Node.js"
+✔️ "Built and deployed a scalable REST API with Node.js and PostgreSQL, handling 10K+ requests/day, reducing server response time by 30%"
+
+Now, improve this description:
+"${current}"
+
+Output only the improved bullet point, no extra text.
+`;
+
 
   try {
     const result = await model.generateContent(prompt);

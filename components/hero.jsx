@@ -21,24 +21,6 @@ const BackgroundBoxesDemo = () => {
 const HeroSection = () => {
   const imageRef = useRef(null);
 
-  useEffect(() => {
-    const imageElement = imageRef.current;
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const scrollThreshold = 100;
-
-      if (scrollPosition > scrollThreshold) {
-        imageElement.classList.add("scrolled");
-      } else {
-        imageElement.classList.remove("scrolled");
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <section className="w-full pt-36 md:pt-48 pb-10 relative">
       <BackgroundBoxesDemo />
@@ -63,17 +45,6 @@ const HeroSection = () => {
               Get Started
             </BorderMagicButton>
           </Link>
-        </div>
-      </div>
-      <div className="hero-image-wrapper mt-12">
-        <div ref={imageRef} className="hero-image">
-          <Image
-            src="/hero-image.png"
-            alt="Career Growth"
-            width={800}
-            height={400}
-            className="rounded-lg shadow-2xl"
-          />
         </div>
       </div>
     </section>
